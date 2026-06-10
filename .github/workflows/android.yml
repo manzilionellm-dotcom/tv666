@@ -1,0 +1,74 @@
+name: Build Android TV APK
+
+# Compile l'APK Black Seven TV (wrapper Capacitor) sur un runner GitHub
+# (SDK Android + réseau disponibles) et la publie en Release -> lien de
+# téléchargement permanent.
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: "URL de l'app web déployée (vide = page de repli)"
+        required: false
+        default: ""
+  push:
+    branches: [claude/tv-app-design-2eevo4]
+    paths:
+      - "android/**"
+      - "capacitor.config.ts"
+      - "capacitor-fallback/**"
+      - ".github/workflows/android.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Synchroniser Capacitor (injecte l'URL si fournie)
+        env:
+          BLACK7_APP_URL: ${{ github.event.inputs.app_url }}
+        run: npx cap sync android
+
+      - name: Compiler l'APK (debug)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Renommer l'APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk black-seven-tv.apk
+
+      - name: Publier l'artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: black-seven-tv-apk
+          path: black-seven-tv.apk
+
+      - name: Publier la Release (lien permanent)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: Black Seven TV — APK Android TV
+          body: |
+            APK Android TV (debug, sideload).
+            Installable via Downloader (AFTVnews) ou adb install.
+            URL chargée : ${{ github.event.inputs.app_url || '(page de repli — définir app_url pour pointer vers l’app déployée)' }}
+          files: black-seven-tv.apk
