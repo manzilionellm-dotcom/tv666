@@ -55,6 +55,40 @@ export interface XtreamLiveStream {
   tv_archive_duration?: number;
 }
 
+export interface XtreamVodStream {
+  num: number;
+  name: string;
+  stream_id: number;
+  stream_icon: string;
+  rating: string;
+  added: string;
+  category_id: string;
+  container_extension: string;
+}
+
+export interface XtreamSeries {
+  num: number;
+  name: string;
+  series_id: number;
+  cover: string;
+  plot: string;
+  rating: string;
+  category_id: string;
+}
+
+export interface XtreamEpisode {
+  id: string;
+  episode_num: number;
+  title: string;
+  container_extension: string;
+  season?: number;
+}
+
+export interface XtreamSeriesInfo {
+  info: { name?: string; cover?: string; plot?: string };
+  episodes: Record<string, XtreamEpisode[]>;
+}
+
 export interface XtreamShortEpgEntry {
   id: string;
   epg_id: string;

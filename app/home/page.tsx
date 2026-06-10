@@ -73,20 +73,30 @@ export default function HomePage() {
       </header>
 
       <section className="grid grid-cols-2 gap-8 md:grid-cols-3">
-        <Focusable
-          autoFocusOnMount
-          onClick={() => router.push("/live")}
-          className="flex aspect-video flex-col justify-end rounded-2xl bg-neutral-900 p-8 text-left"
-        >
-          <span className="text-3xl font-semibold text-neutral-50">
-            TV en direct
-          </span>
-          <span className="text-lg text-neutral-200">Chaînes live & EPG</span>
-        </Focusable>
+        {[
+          {
+            title: "TV en direct",
+            sub: "Chaînes live & EPG",
+            route: "/live",
+            focus: true,
+          },
+          { title: "Films (VOD)", sub: "Bibliothèque de films", route: "/vod" },
+          { title: "Séries", sub: "Saisons & épisodes", route: "/series" },
+        ].map((card) => (
+          <Focusable
+            key={card.title}
+            autoFocusOnMount={card.focus}
+            onClick={() => router.push(card.route)}
+            className="flex aspect-video flex-col justify-end rounded-2xl bg-neutral-900 p-8 text-left"
+          >
+            <span className="text-3xl font-semibold text-neutral-50">
+              {card.title}
+            </span>
+            <span className="text-lg text-neutral-200">{card.sub}</span>
+          </Focusable>
+        ))}
 
         {[
-          { title: "Films (VOD)", note: "Bientôt" },
-          { title: "Séries", note: "Bientôt" },
           { title: "Recherche", note: "Bientôt" },
           { title: "Favoris", note: "Bientôt" },
         ].map((card) => (

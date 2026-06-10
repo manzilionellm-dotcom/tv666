@@ -1,12 +1,18 @@
 "use client";
 
-// Black Seven TV — Lecteur HLS (hls.js). Lit les flux live Xtream (.m3u8) servis
-// via le proxy /api/stream. Repli sur la lecture HLS native (Safari) si dispo.
+// Black Seven TV — Lecteur vidéo. Mode "hls" (live, .m3u8 via hls.js) ou "file"
+// (VOD/séries : fichier mp4/mkv direct). Flux servis via le proxy /api/stream.
 
 import Hls from "hls.js";
 import { useEffect, useRef, useState } from "react";
 
-export default function Player({ src }: { src: string }) {
+type Props = {
+  src: string;
+  mode?: "hls" | "file";
+  controls?: boolean;
+};
+
+export default function Player({ src, mode = "hls", controls = false }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,9 +26,18 @@ export default function Player({ src }: { src: string }) {
     let hls: Hls | null = null;
 
     const onPlaying = () => setLoading(false);
+    const onFileError = () =>
+      setError(
+        "Lecture impossible. Format non supporté par le navigateur (mkv ?) ou fichier indisponible.",
+      );
     video.addEventListener("playing", onPlaying);
 
-    if (Hls.isSupported()) {
+    if (mode === "file") {
+      // VOD : fichier direct, le navigateur gère le téléchargement progressif + seek.
+      video.addEventListener("error", onFileError);
+      video.src = src;
+      video.play().catch(() => {});
+    } else if (Hls.isSupported()) {
       hls = new Hls({ lowLatencyMode: false, enableWorker: true });
       hls.loadSource(src);
       hls.attachMedia(video);
@@ -50,11 +65,12 @@ export default function Player({ src }: { src: string }) {
 
     return () => {
       video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("error", onFileError);
       if (hls) hls.destroy();
       video.removeAttribute("src");
       video.load();
     };
-  }, [src]);
+  }, [src, mode]);
 
   return (
     <div className="relative h-full w-full bg-neutral-950">
@@ -63,7 +79,7 @@ export default function Player({ src }: { src: string }) {
         className="h-full w-full"
         autoPlay
         playsInline
-        controls={false}
+        controls={controls}
       />
       {loading && !error && (
         <div className="absolute inset-0 flex items-center justify-center">

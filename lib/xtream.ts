@@ -7,7 +7,10 @@ import type {
   XtreamCategory,
   XtreamCredentials,
   XtreamLiveStream,
+  XtreamSeries,
+  XtreamSeriesInfo,
   XtreamShortEpgEntry,
+  XtreamVodStream,
 } from "./types";
 
 /** Normalise la base serveur : ajoute http:// si absent, retire le / final. */
@@ -76,16 +79,92 @@ export function getShortEpg(
   });
 }
 
-/** URL du flux live (.m3u8) servie via le proxy HLS pour éviter le CORS. */
+// --- VOD (Films) ---
+
+export function getVodCategories(
+  creds: XtreamCredentials,
+): Promise<XtreamCategory[]> {
+  return call<XtreamCategory[]>(creds, "get_vod_categories");
+}
+
+export function getVodStreams(
+  creds: XtreamCredentials,
+  categoryId?: string,
+): Promise<XtreamVodStream[]> {
+  return call<XtreamVodStream[]>(
+    creds,
+    "get_vod_streams",
+    categoryId ? { category_id: categoryId } : undefined,
+  );
+}
+
+// --- Séries ---
+
+export function getSeriesCategories(
+  creds: XtreamCredentials,
+): Promise<XtreamCategory[]> {
+  return call<XtreamCategory[]>(creds, "get_series_categories");
+}
+
+export function getSeries(
+  creds: XtreamCredentials,
+  categoryId?: string,
+): Promise<XtreamSeries[]> {
+  return call<XtreamSeries[]>(
+    creds,
+    "get_series",
+    categoryId ? { category_id: categoryId } : undefined,
+  );
+}
+
+export function getSeriesInfo(
+  creds: XtreamCredentials,
+  seriesId: number,
+): Promise<XtreamSeriesInfo> {
+  return call<XtreamSeriesInfo>(creds, "get_series_info", {
+    series_id: seriesId,
+  });
+}
+
+// --- URLs de flux (via proxy /api/stream) ---
+
+function proxied(direct: string, kind: "playlist" | "auto"): string {
+  return `/api/stream?kind=${kind}&url=${encodeURIComponent(direct)}`;
+}
+
+function streamBase(creds: XtreamCredentials): string {
+  return `${normalizeServer(creds.server)}/{kind}/${encodeURIComponent(
+    creds.username,
+  )}/${encodeURIComponent(creds.password)}`;
+}
+
+/** Flux live (.m3u8) servi via le proxy HLS pour éviter le CORS. */
 export function liveStreamUrl(
   creds: XtreamCredentials,
   streamId: number,
 ): string {
-  const base = normalizeServer(creds.server);
-  const direct = `${base}/live/${encodeURIComponent(creds.username)}/${encodeURIComponent(
-    creds.password,
-  )}/${streamId}.m3u8`;
-  return `/api/stream?kind=playlist&url=${encodeURIComponent(direct)}`;
+  const direct = `${streamBase(creds).replace("{kind}", "live")}/${streamId}.m3u8`;
+  return proxied(direct, "playlist");
+}
+
+/** Flux d'un film VOD (fichier direct mp4/mkv…). */
+export function vodStreamUrl(
+  creds: XtreamCredentials,
+  streamId: number,
+  ext: string,
+): string {
+  const direct = `${streamBase(creds).replace("{kind}", "movie")}/${streamId}.${ext || "mp4"}`;
+  return proxied(direct, "auto");
+}
+
+/** Flux d'un épisode de série (fichier direct). */
+export function seriesStreamUrl(
+  creds: XtreamCredentials,
+  episodeId: string,
+  ext: string,
+): string {
+  const direct = `${streamBase(creds).replace("{kind}", "series")}/${episodeId}.${ext || "mp4"}`;
+  return proxied(direct, "auto");
 }
 
 /** Décode un champ base64 EPG (titre/description), tolérant aux valeurs vides. */
