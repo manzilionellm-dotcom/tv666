@@ -64,3 +64,40 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ============================================================
+   PRIMITIVES TV "10-foot" (mise à l'échelle 12" -> 120")
+   ============================================================ */
+
+/* Échelle fluide : 1rem suit la largeur du viewport, bornée. */
+:root {
+  font-size: clamp(14px, 1.15vw, 30px);
+}
+
+/* Zone safe / overscan : marge de sécurité sur les bords TV. */
+.tv-safe {
+  padding: 4vh 4vw;
+}
+
+/* [I1] Focus JAMAIS par la couleur seule : scale ~1.08x + anneau or + halo doux. */
+.tv-focusable {
+  outline: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.tv-focusable:focus,
+.tv-focusable:focus-visible {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 0.18rem var(--color-primary-500),
+    0 0 1.4rem 0.2rem rgb(201 162 75 / 0.35);
+  position: relative;
+  z-index: 1;
+}
+
+/* Masque la barre de défilement (esthétique TV), défilement conservé. */
+.tv-scroll {
+  scrollbar-width: none;
+}
+.tv-scroll::-webkit-scrollbar {
+  display: none;
+}
