@@ -6,8 +6,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadCredentials } from "@/lib/auth";
 import { getVodCategories, getVodStreams } from "@/lib/xtream";
+import { categoryLocked } from "@/lib/parental";
 import type { XtreamCategory, XtreamVodStream } from "@/lib/types";
 import Focusable from "@/components/tv/Focusable";
+import PinPrompt from "@/components/PinPrompt";
 import Splash from "@/components/Splash";
 
 export default function VodPage() {
@@ -18,6 +20,7 @@ export default function VodPage() {
   const [movies, setMovies] = useState<XtreamVodStream[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pinFor, setPinFor] = useState<XtreamCategory | null>(null);
 
   const creds = typeof window !== "undefined" ? loadCredentials() : null;
 
@@ -37,6 +40,14 @@ export default function VodPage() {
     [creds],
   );
 
+  function onCategory(cat: XtreamCategory) {
+    if (categoryLocked(cat.category_name)) {
+      setPinFor(cat);
+      return;
+    }
+    loadMovies(cat.category_id);
+  }
+
   useEffect(() => {
     if (!creds) {
       router.replace("/login");
@@ -46,7 +57,8 @@ export default function VodPage() {
     getVodCategories(creds)
       .then((cats) => {
         setCategories(cats);
-        if (cats.length > 0) loadMovies(cats[0].category_id);
+        const first = cats.find((c) => !categoryLocked(c.category_name));
+        if (first) loadMovies(first.category_id);
       })
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Erreur de chargement."),
@@ -58,6 +70,16 @@ export default function VodPage() {
 
   return (
     <main className="flex flex-1 overflow-hidden">
+      {pinFor && (
+        <PinPrompt
+          onSuccess={() => {
+            const cat = pinFor;
+            setPinFor(null);
+            loadMovies(cat.category_id);
+          }}
+          onCancel={() => setPinFor(null)}
+        />
+      )}
       <aside className="tv-scroll w-1/4 max-w-xs overflow-y-auto bg-neutral-900 py-6">
         <h2 className="px-6 pb-4 text-sm uppercase tracking-wider text-neutral-400">
           Films
@@ -66,13 +88,14 @@ export default function VodPage() {
           {categories.map((cat) => (
             <li key={cat.category_id}>
               <Focusable
-                onClick={() => loadMovies(cat.category_id)}
+                onClick={() => onCategory(cat)}
                 className={`block w-full truncate px-6 py-3 text-left text-lg ${
                   activeCat === cat.category_id
                     ? "bg-neutral-800 text-primary-500"
                     : "text-neutral-200"
                 }`}
               >
+                {categoryLocked(cat.category_name) ? "🔒 " : ""}
                 {cat.category_name}
               </Focusable>
             </li>

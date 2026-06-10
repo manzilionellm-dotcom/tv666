@@ -6,8 +6,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadCredentials } from "@/lib/auth";
 import { getLiveCategories, getLiveStreams } from "@/lib/xtream";
+import { categoryLocked } from "@/lib/parental";
 import type { XtreamCategory, XtreamLiveStream } from "@/lib/types";
 import Focusable from "@/components/tv/Focusable";
+import PinPrompt from "@/components/PinPrompt";
 import Splash from "@/components/Splash";
 
 export default function LivePage() {
@@ -18,6 +20,7 @@ export default function LivePage() {
   const [channels, setChannels] = useState<XtreamLiveStream[]>([]);
   const [loadingChannels, setLoadingChannels] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pinFor, setPinFor] = useState<XtreamCategory | null>(null);
 
   const creds = typeof window !== "undefined" ? loadCredentials() : null;
 
@@ -37,6 +40,14 @@ export default function LivePage() {
     [creds],
   );
 
+  function onCategory(cat: XtreamCategory) {
+    if (categoryLocked(cat.category_name)) {
+      setPinFor(cat);
+      return;
+    }
+    loadChannels(cat.category_id);
+  }
+
   useEffect(() => {
     if (!creds) {
       router.replace("/login");
@@ -46,7 +57,8 @@ export default function LivePage() {
     getLiveCategories(creds)
       .then((cats) => {
         setCategories(cats);
-        if (cats.length > 0) loadChannels(cats[0].category_id);
+        const first = cats.find((c) => !categoryLocked(c.category_name));
+        if (first) loadChannels(first.category_id);
       })
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Erreur de chargement."),
@@ -58,6 +70,16 @@ export default function LivePage() {
 
   return (
     <main className="flex flex-1 overflow-hidden">
+      {pinFor && (
+        <PinPrompt
+          onSuccess={() => {
+            const cat = pinFor;
+            setPinFor(null);
+            loadChannels(cat.category_id);
+          }}
+          onCancel={() => setPinFor(null)}
+        />
+      )}
       {/* Catégories */}
       <aside className="tv-scroll w-1/4 max-w-xs overflow-y-auto bg-neutral-900 py-6">
         <h2 className="px-6 pb-4 text-sm uppercase tracking-wider text-neutral-400">
@@ -67,13 +89,14 @@ export default function LivePage() {
           {categories.map((cat) => (
             <li key={cat.category_id}>
               <Focusable
-                onClick={() => loadChannels(cat.category_id)}
+                onClick={() => onCategory(cat)}
                 className={`block w-full truncate px-6 py-3 text-left text-lg ${
                   activeCat === cat.category_id
                     ? "bg-neutral-800 text-primary-500"
                     : "text-neutral-200"
                 }`}
               >
+                {categoryLocked(cat.category_name) ? "🔒 " : ""}
                 {cat.category_name}
               </Focusable>
             </li>
@@ -101,7 +124,9 @@ export default function LivePage() {
               key={ch.stream_id}
               onClick={() =>
                 router.push(
-                  `/watch?id=${ch.stream_id}&name=${encodeURIComponent(ch.name)}`,
+                  `/watch?id=${ch.stream_id}&name=${encodeURIComponent(
+                    ch.name,
+                  )}&arch=${ch.tv_archive ? 1 : 0}`,
                 )
               }
               className="flex items-center gap-4 rounded-xl bg-neutral-900 p-4 text-left"

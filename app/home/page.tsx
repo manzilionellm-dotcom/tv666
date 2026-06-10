@@ -4,10 +4,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loadCredentials, clearCredentials } from "@/lib/auth";
+import { loadCredentials } from "@/lib/auth";
 import { authenticate } from "@/lib/xtream";
 import Focusable from "@/components/tv/Focusable";
 import Splash from "@/components/Splash";
+
+const SECTIONS = [
+  { title: "TV en direct", sub: "Chaînes live", route: "/live" },
+  { title: "Films (VOD)", sub: "Bibliothèque", route: "/vod" },
+  { title: "Séries", sub: "Saisons & épisodes", route: "/series" },
+  { title: "Guide TV", sub: "EPG en cours / à suivre", route: "/guide" },
+  { title: "Recherche", sub: "Chaînes, films, séries", route: "/search" },
+  { title: "Favoris", sub: "Ta sélection", route: "/favorites" },
+  { title: "Multiview", sub: "Mosaïque 4 chaînes", route: "/multiview" },
+  { title: "Réglages", sub: "Compte & contrôle parental", route: "/settings" },
+];
 
 function formatExpiry(exp: string | null): string {
   if (!exp) return "Illimité";
@@ -39,11 +50,6 @@ export default function HomePage() {
       .catch(() => setStatus("hors-ligne"));
   }, [router]);
 
-  function logout() {
-    clearCredentials();
-    router.replace("/login");
-  }
-
   if (!ready) return <Splash />;
 
   return (
@@ -64,52 +70,26 @@ export default function HomePage() {
             </span>
           )}
           <Focusable
-            onClick={logout}
+            onClick={() => router.push("/settings")}
             className="rounded-full border border-neutral-700 px-6 py-3 text-lg text-neutral-50 hover:bg-neutral-800"
           >
-            Déconnexion
+            Réglages
           </Focusable>
         </div>
       </header>
 
-      <section className="grid grid-cols-2 gap-8 md:grid-cols-3">
-        {[
-          {
-            title: "TV en direct",
-            sub: "Chaînes live & EPG",
-            route: "/live",
-            focus: true,
-          },
-          { title: "Films (VOD)", sub: "Bibliothèque de films", route: "/vod" },
-          { title: "Séries", sub: "Saisons & épisodes", route: "/series" },
-        ].map((card) => (
+      <section className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+        {SECTIONS.map((card, i) => (
           <Focusable
-            key={card.title}
-            autoFocusOnMount={card.focus}
+            key={card.route}
+            autoFocusOnMount={i === 0}
             onClick={() => router.push(card.route)}
-            className="flex aspect-video flex-col justify-end rounded-2xl bg-neutral-900 p-8 text-left"
+            className="flex aspect-video flex-col justify-end rounded-2xl bg-neutral-900 p-6 text-left"
           >
-            <span className="text-3xl font-semibold text-neutral-50">
+            <span className="text-2xl font-semibold text-neutral-50">
               {card.title}
             </span>
-            <span className="text-lg text-neutral-200">{card.sub}</span>
-          </Focusable>
-        ))}
-
-        {[
-          { title: "Recherche", note: "Bientôt" },
-          { title: "Favoris", note: "Bientôt" },
-        ].map((card) => (
-          <Focusable
-            key={card.title}
-            disabled
-            aria-disabled="true"
-            className="flex aspect-video cursor-not-allowed flex-col justify-end rounded-2xl bg-neutral-900 p-8 text-left opacity-50"
-          >
-            <span className="text-3xl font-semibold text-neutral-50">
-              {card.title}
-            </span>
-            <span className="text-lg text-neutral-400">{card.note}</span>
+            <span className="text-base text-neutral-200">{card.sub}</span>
           </Focusable>
         ))}
       </section>

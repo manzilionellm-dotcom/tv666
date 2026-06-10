@@ -167,6 +167,30 @@ export function seriesStreamUrl(
   return proxied(direct, "auto");
 }
 
+/**
+ * Catch-up / replay (timeshift). Pour les chaînes avec tv_archive=1.
+ * @param startISO Date de début au format "YYYY-MM-DD:HH-MM".
+ * @param durationMin Durée en minutes.
+ */
+export function timeshiftUrl(
+  creds: XtreamCredentials,
+  streamId: number,
+  startISO: string,
+  durationMin: number,
+): string {
+  const direct = `${streamBase(creds).replace("{kind}", "timeshift")}/${durationMin}/${startISO}/${streamId}.m3u8`;
+  return proxied(direct, "playlist");
+}
+
+/** Formate un timestamp unix (secondes) en "YYYY-MM-DD:HH-MM" pour le timeshift. */
+export function toTimeshiftStart(unixSeconds: number): string {
+  const d = new Date(unixSeconds * 1000);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}:${p(
+    d.getHours(),
+  )}-${p(d.getMinutes())}`;
+}
+
 /** Décode un champ base64 EPG (titre/description), tolérant aux valeurs vides. */
 export function decodeEpg(value: string | undefined | null): string {
   if (!value) return "";

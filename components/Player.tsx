@@ -10,9 +10,15 @@ type Props = {
   src: string;
   mode?: "hls" | "file";
   controls?: boolean;
+  muted?: boolean;
 };
 
-export default function Player({ src, mode = "hls", controls = false }: Props) {
+export default function Player({
+  src,
+  mode = "hls",
+  controls = false,
+  muted = false,
+}: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,6 +85,7 @@ export default function Player({ src, mode = "hls", controls = false }: Props) {
         className="h-full w-full"
         autoPlay
         playsInline
+        muted={muted}
         controls={controls}
       />
       {loading && !error && (

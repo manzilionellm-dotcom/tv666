@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { loadCredentials } from "@/lib/auth";
 import { seriesStreamUrl, vodStreamUrl } from "@/lib/xtream";
 import Player from "@/components/Player";
+import FavButton from "@/components/FavButton";
 import Splash from "@/components/Splash";
 
 function Play() {
@@ -52,6 +53,11 @@ function Play() {
       <div className="pointer-events-none absolute left-0 top-0 w-full bg-gradient-to-b from-neutral-950/80 to-transparent p-8">
         <h1 className="text-3xl font-semibold text-neutral-50">{name}</h1>
       </div>
+      {kind === "movie" && id && (
+        <div className="absolute bottom-0 left-0 flex w-full items-center gap-3 bg-gradient-to-t from-neutral-950/80 to-transparent p-8">
+          <FavButton item={{ type: "movie", id, name, ext }} />
+        </div>
+      )}
     </main>
   );
 }
