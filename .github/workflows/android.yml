@@ -53,21 +53,33 @@ jobs:
           name: black-seven-tv-apk
           path: black-seven-tv.apk
 
-      - name: Héberger l'APK sur un lien public permanent (téléchargeable sur la TV)
+      - name: Héberger l'APK sur un lien public (téléchargeable sur la TV)
         run: |
-          UA="black7tv-ci"
-          echo "Upload vers catbox.moe (permanent)…"
-          URL=$(curl -fsS -H "User-Agent: $UA" -F "reqtype=fileupload" -F "fileToUpload=@black-seven-tv.apk" https://catbox.moe/user/api.php || true)
-          case "$URL" in https://*) ;; *) URL="" ;; esac
+          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
+          URL=""
+          # catbox.moe (permanent) — 3 tentatives
+          for i in 1 2 3; do
+            echo "catbox.moe, tentative $i…"
+            R=$(curl -sS -A "$UA" -F "reqtype=fileupload" -F "fileToUpload=@black-seven-tv.apk" https://catbox.moe/user/api.php || true)
+            case "$R" in https://*) URL="$R"; break ;; *) echo "  -> $R"; sleep 3 ;; esac
+          done
+          # litterbox (72h) en repli
           if [ -z "$URL" ]; then
-            echo "catbox a échoué, essai 0x0.st…"
-            URL=$(curl -fsS -H "User-Agent: $UA" -F "file=@black-seven-tv.apk" https://0x0.st || true)
-            case "$URL" in https://*) ;; *) URL="" ;; esac
+            echo "litterbox (72h)…"
+            R=$(curl -sS -A "$UA" -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@black-seven-tv.apk" https://litterbox.catbox.moe/resources/internals/api.php || true)
+            case "$R" in https://*) URL="$R" ;; esac
           fi
+          # 0x0.st en repli
           if [ -z "$URL" ]; then
-            echo "0x0.st a échoué, essai tmpfiles.org (≈1h)…"
-            RAW=$(curl -fsS -F "file=@black-seven-tv.apk" https://tmpfiles.org/api/v1/upload | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' || true)
-            URL=$(echo "$RAW" | sed 's#tmpfiles.org/#tmpfiles.org/dl/#')
+            echo "0x0.st…"
+            R=$(curl -sS -A "$UA" -F "file=@black-seven-tv.apk" https://0x0.st || true)
+            case "$R" in https://*) URL="$R" ;; esac
+          fi
+          # tmpfiles (≈1h) en dernier recours
+          if [ -z "$URL" ]; then
+            echo "tmpfiles.org (≈1h)…"
+            RAW=$(curl -sS -F "file=@black-seven-tv.apk" https://tmpfiles.org/api/v1/upload | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' || true)
+            [ -n "$RAW" ] && URL=$(echo "$RAW" | sed 's#tmpfiles.org/#tmpfiles.org/dl/#')
           fi
           echo "APK_PUBLIC_URL=$URL"
           {
