@@ -54,12 +54,11 @@ jobs:
           path: black-seven-tv.apk
 
       - name: Publier la Release (lien permanent)
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: apk-latest
-          name: Black Seven TV — APK Android TV
-          body: |
-            APK Android TV autonome (debug, sideload).
-            App bundlée — parle directement au serveur Xtream (aucun hébergement requis).
-            Installable via Downloader (AFTVnews) ou `adb install`.
-          files: black-seven-tv.apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete apk-latest --yes --cleanup-tag || true
+          gh release create apk-latest black-seven-tv.apk \
+            --target "$GITHUB_SHA" \
+            --title "Black Seven TV — APK Android TV" \
+            --notes "APK Android TV autonome (debug, sideload). App bundlée — parle directement au serveur Xtream (aucun hébergement requis). Installable via Downloader (AFTVnews) ou adb install."
