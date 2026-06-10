@@ -53,24 +53,31 @@ jobs:
           name: black-seven-tv-apk
           path: black-seven-tv.apk
 
-      - name: Héberger l'APK sur un lien public (téléchargeable sur la TV)
+      - name: Héberger l'APK sur un lien public permanent (téléchargeable sur la TV)
         run: |
-          set -e
           UA="black7tv-ci"
-          echo "Upload vers 0x0.st…"
-          URL=$(curl -fsS -H "User-Agent: $UA" -F "file=@black-seven-tv.apk" https://0x0.st || true)
+          echo "Upload vers catbox.moe (permanent)…"
+          URL=$(curl -fsS -H "User-Agent: $UA" -F "reqtype=fileupload" -F "fileToUpload=@black-seven-tv.apk" https://catbox.moe/user/api.php || true)
+          case "$URL" in https://*) ;; *) URL="" ;; esac
           if [ -z "$URL" ]; then
-            echo "0x0.st a échoué, essai tmpfiles.org…"
-            URL=$(curl -fsS -F "file=@black-seven-tv.apk" https://tmpfiles.org/api/v1/upload | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' || true)
+            echo "catbox a échoué, essai 0x0.st…"
+            URL=$(curl -fsS -H "User-Agent: $UA" -F "file=@black-seven-tv.apk" https://0x0.st || true)
+            case "$URL" in https://*) ;; *) URL="" ;; esac
+          fi
+          if [ -z "$URL" ]; then
+            echo "0x0.st a échoué, essai tmpfiles.org (≈1h)…"
+            RAW=$(curl -fsS -F "file=@black-seven-tv.apk" https://tmpfiles.org/api/v1/upload | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' || true)
+            URL=$(echo "$RAW" | sed 's#tmpfiles.org/#tmpfiles.org/dl/#')
           fi
           echo "APK_PUBLIC_URL=$URL"
           {
-            echo "## 📥 Télécharger l'APK"
+            echo "## 📥 Télécharger l'APK Black Seven TV"
             echo ""
             echo "**Lien public (TV / Downloader) :** $URL"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Publier la Release (archive)
+      - name: Publier la Release (archive, non bloquant)
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -78,4 +85,4 @@ jobs:
           gh release create apk-latest black-seven-tv.apk \
             --target "$GITHUB_SHA" \
             --title "Black Seven TV — APK Android TV" \
-            --notes "APK Android TV autonome (debug, sideload). App bundlée — parle directement au serveur Xtream (aucun hébergement requis). Installable via Downloader (AFTVnews) ou adb install."
+            --notes "APK Android TV autonome (debug, sideload)."
