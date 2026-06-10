@@ -1,25 +1,27 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
-// Black Seven TV — Wrapper Android TV (Capacitor).
-// L'APK charge l'app web Black Seven TV déployée (mode server.url), ce qui
-// conserve les proxys anti-CORS (/api/xtream, /api/stream) côté serveur.
-//
-// Définis l'URL déployée au moment du build, ex :
-//   BLACK7_APP_URL="https://ton-app.vercel.app" npx cap sync android
-const appUrl = process.env.BLACK7_APP_URL;
-
+// Black Seven TV — APK Android TV autonome (Capacitor).
+// L'app web (export statique Next dans `out/`) est bundlée dans l'APK. Elle
+// appelle directement le serveur Xtream ; CapacitorHttp fournit le HTTP natif
+// qui contourne le CORS et autorise le cleartext http (panels/flux IPTV en http).
 const config: CapacitorConfig = {
   appId: "com.blackseven.tv",
   appName: "Black Seven TV",
-  webDir: "capacitor-fallback",
+  webDir: "out",
   server: {
-    // cleartext : autorise les serveurs/flux IPTV en http (très courant).
+    // Autorise les serveurs/flux IPTV en http (très courant).
     cleartext: true,
-    ...(appUrl ? { url: appUrl } : {}),
+    androidScheme: "http",
   },
   android: {
-    // Autorise le contenu mixte (segments http dans une page https).
+    // Autorise le contenu mixte (segments http dans une page locale).
     allowMixedContent: true,
+  },
+  plugins: {
+    // Patche fetch/XHR vers le HTTP natif -> pas de CORS pour l'API et hls.js.
+    CapacitorHttp: {
+      enabled: true,
+    },
   },
 };
 

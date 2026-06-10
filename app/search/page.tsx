@@ -80,7 +80,10 @@ export default function SearchPage() {
           r.ext,
         )}&name=${encodeURIComponent(r.name)}`,
       );
-    else router.push(`/series/${r.id}?name=${encodeURIComponent(r.name)}`);
+    else
+      router.push(
+        `/series/detail?id=${r.id}&name=${encodeURIComponent(r.name)}`,
+      );
   }
 
   const label: Record<Result["kind"], string> = {

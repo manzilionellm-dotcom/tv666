@@ -6,18 +6,8 @@ name: Build Android TV APK
 
 on:
   workflow_dispatch:
-    inputs:
-      app_url:
-        description: "URL de l'app web déployée (vide = page de repli)"
-        required: false
-        default: ""
   push:
     branches: [claude/tv-app-design-2eevo4]
-    paths:
-      - "android/**"
-      - "capacitor.config.ts"
-      - "capacitor-fallback/**"
-      - ".github/workflows/android.yml"
 
 permissions:
   contents: write
@@ -34,6 +24,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Export statique de l'app (génère out/)
+        run: npm run build
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -42,9 +35,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Synchroniser Capacitor (injecte l'URL si fournie)
-        env:
-          BLACK7_APP_URL: ${{ github.event.inputs.app_url }}
+      - name: Synchroniser Capacitor (copie out/ dans l'APK)
         run: npx cap sync android
 
       - name: Compiler l'APK (debug)
@@ -68,7 +59,7 @@ jobs:
           tag_name: apk-latest
           name: Black Seven TV — APK Android TV
           body: |
-            APK Android TV (debug, sideload).
-            Installable via Downloader (AFTVnews) ou adb install.
-            URL chargée : ${{ github.event.inputs.app_url || '(page de repli — définir app_url pour pointer vers l’app déployée)' }}
+            APK Android TV autonome (debug, sideload).
+            App bundlée — parle directement au serveur Xtream (aucun hébergement requis).
+            Installable via Downloader (AFTVnews) ou `adb install`.
           files: black-seven-tv.apk

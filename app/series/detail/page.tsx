@@ -1,9 +1,10 @@
 "use client";
 
 // Black Seven TV — Détail d'une série : saisons / épisodes + favori.
+// Route en query (?id=&name=) pour rester compatible avec l'export statique.
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loadCredentials } from "@/lib/auth";
 import { getSeriesInfo } from "@/lib/xtream";
 import type { XtreamSeriesInfo } from "@/lib/types";
@@ -11,11 +12,10 @@ import Focusable from "@/components/tv/Focusable";
 import FavButton from "@/components/FavButton";
 import Splash from "@/components/Splash";
 
-export default function SeriesDetailPage() {
+function Detail() {
   const router = useRouter();
-  const params = useParams<{ id: string }>();
   const search = useSearchParams();
-  const seriesId = params?.id;
+  const seriesId = search.get("id");
   const name = search.get("name") ?? "Série";
   const [info, setInfo] = useState<XtreamSeriesInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -102,5 +102,13 @@ export default function SeriesDetailPage() {
         </section>
       ))}
     </main>
+  );
+}
+
+export default function SeriesDetailPage() {
+  return (
+    <Suspense fallback={<Splash />}>
+      <Detail />
+    </Suspense>
   );
 }

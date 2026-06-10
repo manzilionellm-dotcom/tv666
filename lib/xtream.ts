@@ -1,6 +1,8 @@
-// Black Seven TV — Client Xtream Codes (côté navigateur).
-// Tous les appels passent par le proxy serveur /api/xtream pour contourner le CORS
-// des panels Xtream. Les flux vidéo passent par /api/stream (proxy HLS).
+// Black Seven TV — Client Xtream Codes (côté appareil).
+// L'app étant un APK autonome (Capacitor), elle appelle DIRECTEMENT le serveur
+// Xtream. Le CORS et le cleartext http sont gérés nativement par CapacitorHttp
+// (qui patche fetch/XHR sur l'appareil). En navigateur, ces appels peuvent
+// échouer au CORS : le produit cible est l'APK.
 
 import type {
   XtreamAuthResponse,
@@ -25,16 +27,20 @@ async function call<T>(
   action?: string,
   params?: Record<string, string | number>,
 ): Promise<T> {
-  const res = await fetch("/api/xtream", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ ...creds, action, params }),
+  const base = normalizeServer(creds.server);
+  const sp = new URLSearchParams({
+    username: creds.username,
+    password: creds.password,
   });
-  const data = (await res.json()) as T & { error?: string };
-  if (!res.ok) {
-    throw new Error((data as { error?: string })?.error || `Erreur ${res.status}`);
+  if (action) sp.set("action", action);
+  if (params) {
+    for (const [k, v] of Object.entries(params)) sp.set(k, String(v));
   }
-  return data as T;
+  const res = await fetch(`${base}/player_api.php?${sp.toString()}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+  return (await res.json()) as T;
 }
 
 /** Authentifie et renvoie les infos compte/serveur. Lève une erreur si refusé. */
@@ -126,25 +132,20 @@ export function getSeriesInfo(
   });
 }
 
-// --- URLs de flux (via proxy /api/stream) ---
+// --- URLs de flux (directes vers le serveur Xtream) ---
 
-function proxied(direct: string, kind: "playlist" | "auto"): string {
-  return `/api/stream?kind=${kind}&url=${encodeURIComponent(direct)}`;
-}
-
-function streamBase(creds: XtreamCredentials): string {
-  return `${normalizeServer(creds.server)}/{kind}/${encodeURIComponent(
+function streamBase(creds: XtreamCredentials, kind: string): string {
+  return `${normalizeServer(creds.server)}/${kind}/${encodeURIComponent(
     creds.username,
   )}/${encodeURIComponent(creds.password)}`;
 }
 
-/** Flux live (.m3u8) servi via le proxy HLS pour éviter le CORS. */
+/** Flux live (.m3u8) chargé par hls.js (XHR natif via CapacitorHttp). */
 export function liveStreamUrl(
   creds: XtreamCredentials,
   streamId: number,
 ): string {
-  const direct = `${streamBase(creds).replace("{kind}", "live")}/${streamId}.m3u8`;
-  return proxied(direct, "playlist");
+  return `${streamBase(creds, "live")}/${streamId}.m3u8`;
 }
 
 /** Flux d'un film VOD (fichier direct mp4/mkv…). */
@@ -153,8 +154,7 @@ export function vodStreamUrl(
   streamId: number,
   ext: string,
 ): string {
-  const direct = `${streamBase(creds).replace("{kind}", "movie")}/${streamId}.${ext || "mp4"}`;
-  return proxied(direct, "auto");
+  return `${streamBase(creds, "movie")}/${streamId}.${ext || "mp4"}`;
 }
 
 /** Flux d'un épisode de série (fichier direct). */
@@ -163,8 +163,7 @@ export function seriesStreamUrl(
   episodeId: string,
   ext: string,
 ): string {
-  const direct = `${streamBase(creds).replace("{kind}", "series")}/${episodeId}.${ext || "mp4"}`;
-  return proxied(direct, "auto");
+  return `${streamBase(creds, "series")}/${episodeId}.${ext || "mp4"}`;
 }
 
 /**
@@ -178,8 +177,7 @@ export function timeshiftUrl(
   startISO: string,
   durationMin: number,
 ): string {
-  const direct = `${streamBase(creds).replace("{kind}", "timeshift")}/${durationMin}/${startISO}/${streamId}.m3u8`;
-  return proxied(direct, "playlist");
+  return `${streamBase(creds, "timeshift")}/${durationMin}/${startISO}/${streamId}.m3u8`;
 }
 
 /** Formate un timestamp unix (secondes) en "YYYY-MM-DD:HH-MM" pour le timeshift. */

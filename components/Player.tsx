@@ -1,7 +1,8 @@
 "use client";
 
 // Black Seven TV — Lecteur vidéo. Mode "hls" (live, .m3u8 via hls.js) ou "file"
-// (VOD/séries : fichier mp4/mkv direct). Flux servis via le proxy /api/stream.
+// (VOD/séries : fichier mp4/mkv direct). Flux chargés directement depuis le
+// serveur Xtream (HTTP natif CapacitorHttp sur l'appareil).
 
 import Hls from "hls.js";
 import { useEffect, useRef, useState } from "react";

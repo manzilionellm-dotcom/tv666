@@ -20,7 +20,7 @@ function playHref(f: FavItem): string {
     return `/play?kind=movie&id=${f.id}&ext=${encodeURIComponent(
       f.ext ?? "mp4",
     )}&name=${encodeURIComponent(f.name)}`;
-  return `/series/${f.id}?name=${encodeURIComponent(f.name)}`;
+  return `/series/detail?id=${f.id}&name=${encodeURIComponent(f.name)}`;
 }
 
 const TYPE_LABEL: Record<FavItem["type"], string> = {

@@ -123,7 +123,9 @@ export default function SeriesPage() {
               key={s.series_id}
               onClick={() =>
                 router.push(
-                  `/series/${s.series_id}?name=${encodeURIComponent(s.name)}`,
+                  `/series/detail?id=${s.series_id}&name=${encodeURIComponent(
+                    s.name,
+                  )}`,
                 )
               }
               className="flex flex-col overflow-hidden rounded-xl bg-neutral-900 text-left"
