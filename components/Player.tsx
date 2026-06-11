@@ -72,7 +72,9 @@ export default function Player({
     } else if (Hls.isSupported()) {
       hls = new Hls({
         lowLatencyMode: false,
-        enableWorker: true,
+        // WebView Capacitor : le worker (blob) est souvent bloqué et fait caler
+        // le flux en silence -> transmuxing sur le thread principal, plus fiable.
+        enableWorker: false,
         manifestLoadingTimeOut: 15000,
         manifestLoadingMaxRetry: 3,
         levelLoadingTimeOut: 15000,
