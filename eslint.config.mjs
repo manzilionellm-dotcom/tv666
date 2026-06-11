@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Projet natif Android (Capacitor) + repli : hors périmètre du lint JS/TS.
+    "android/**",
+    "capacitor-fallback/**",
   ]),
 ]);
 

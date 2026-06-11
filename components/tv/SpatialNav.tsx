@@ -5,14 +5,15 @@
 // de la flèche. Les éléments natifs (button/a/input) gèrent Entrée/OK eux-mêmes.
 
 import { useEffect } from "react";
+import { isTextEntry, remoteAction } from "@/lib/remote";
 
 type Dir = "up" | "down" | "left" | "right";
 
-const KEY_TO_DIR: Record<string, Dir> = {
-  ArrowUp: "up",
-  ArrowDown: "down",
-  ArrowLeft: "left",
-  ArrowRight: "right",
+const ACTION_TO_DIR: Record<string, Dir> = {
+  up: "up",
+  down: "down",
+  left: "left",
+  right: "right",
 };
 
 function candidates(): HTMLElement[] {
@@ -74,13 +75,31 @@ function pick(current: HTMLElement, dir: Dir): HTMLElement | null {
 export default function SpatialNav({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      const dir = KEY_TO_DIR[e.key];
-      if (!dir) return;
+      const action = remoteAction(e);
+      if (!action) return;
 
       const active = document.activeElement as HTMLElement | null;
-      const tag = active?.tagName;
-      const typing =
-        tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+      const typing = isTextEntry(active);
+
+      // OK universel : certaines télécommandes envoient l'OK comme "Select" ou
+      // keyCode 13 SANS e.key === "Enter". On clique alors l'élément focalisé.
+      // On laisse le chemin natif "Enter" intact (boutons + submit de formulaire).
+      if (action === "ok") {
+        if (e.key === "Enter" || typing) return;
+        if (
+          active &&
+          active.tagName === "BUTTON" &&
+          active.hasAttribute("data-focusable")
+        ) {
+          e.preventDefault();
+          active.click();
+        }
+        return;
+      }
+
+      const dir = ACTION_TO_DIR[action];
+      if (!dir) return; // back / channel / média / chiffres : gérés ailleurs
+
       // Dans un champ texte, gauche/droite déplacent le curseur : on n'intercepte pas.
       if (typing && (dir === "left" || dir === "right")) return;
 
