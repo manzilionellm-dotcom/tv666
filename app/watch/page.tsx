@@ -14,7 +14,9 @@ import {
   toTimeshiftStart,
 } from "@/lib/xtream";
 import { addRecent } from "@/lib/recent";
+import { nativePlaybackAvailable } from "@/lib/nativePlayer";
 import Player from "@/components/Player";
+import NativeStreamLauncher from "@/components/NativeStreamLauncher";
 import FavButton from "@/components/FavButton";
 import Focusable from "@/components/tv/Focusable";
 import Splash from "@/components/Splash";
@@ -91,6 +93,17 @@ function Watch() {
   }, [router]);
 
   if (!src) return <Splash />;
+
+  // Appareil : lecteur natif ExoPlayer (décodage matériel H.264/H.265/AC-3).
+  if (nativePlaybackAvailable()) {
+    return (
+      <NativeStreamLauncher
+        url={src}
+        title={name}
+        onExit={() => router.push("/live")}
+      />
+    );
+  }
 
   return (
     <main className="relative flex flex-1 bg-neutral-950">

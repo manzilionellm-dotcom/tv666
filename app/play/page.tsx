@@ -7,7 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { loadCredentials } from "@/lib/auth";
 import { seriesStreamUrl, vodStreamUrl } from "@/lib/xtream";
 import { addRecent } from "@/lib/recent";
+import { nativePlaybackAvailable } from "@/lib/nativePlayer";
 import Player from "@/components/Player";
+import NativeStreamLauncher from "@/components/NativeStreamLauncher";
 import FavButton from "@/components/FavButton";
 import Splash from "@/components/Splash";
 
@@ -53,6 +55,17 @@ function Play() {
   }, [router]);
 
   if (!src) return <Splash />;
+
+  // Appareil : lecteur natif ExoPlayer (décodage matériel, seek, tous codecs).
+  if (nativePlaybackAvailable()) {
+    return (
+      <NativeStreamLauncher
+        url={src}
+        title={name}
+        onExit={() => router.back()}
+      />
+    );
+  }
 
   return (
     <main className="relative flex flex-1 bg-neutral-950">
