@@ -1,11 +1,15 @@
 "use client";
 
-// Black Seven TV — Lecteur vidéo. Mode "hls" (live, .m3u8 via hls.js) ou "file"
-// (VOD/séries : fichier mp4/mkv direct). Flux chargés directement depuis le
-// serveur Xtream (HTTP natif CapacitorHttp sur l'appareil).
+// The Few — Lecteur vidéo. Mode "hls" (live, .m3u8 via hls.js) ou "file"
+// (VOD/séries : fichier direct). Flux chargés directement depuis le serveur
+// Xtream (HTTP natif CapacitorHttp sur l'appareil).
+//
+// Robustesse : chien de garde anti-blocage (timeout), récupération auto sur
+// erreur réseau/média, message d'erreur DÉTAILLÉ (code hls.js) + « Réessayer ».
 
-import Hls from "hls.js";
+import Hls, { ErrorTypes } from "hls.js";
 import { useEffect, useRef, useState } from "react";
+import Focusable from "@/components/tv/Focusable";
 
 type Props = {
   src: string;
@@ -13,6 +17,8 @@ type Props = {
   controls?: boolean;
   muted?: boolean;
 };
+
+const WATCHDOG_MS = 25000;
 
 export default function Player({
   src,
@@ -23,61 +29,107 @@ export default function Player({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // L'état initial (loading=true) est garanti frais via key={src} côté parent,
-    // donc pas de reset synchrone ici.
     let hls: Hls | null = null;
+    let recoveries = 0;
+    let started = false;
 
-    const onPlaying = () => setLoading(false);
-    const onFileError = () =>
-      setError(
-        "Lecture impossible. Format non supporté par le navigateur (mkv ?) ou fichier indisponible.",
-      );
+    // Chien de garde : si rien ne démarre, on sort du silence (plus de
+    // « Chargement… » infini comme sur la capture).
+    const watchdog = window.setTimeout(() => {
+      if (!started) {
+        setLoading(false);
+        setError(
+          "⏱️ Le flux ne démarre pas (25 s). Causes probables : codec non supporté par la WebView (H.265/HEVC), serveur IPTV lent/hors-ligne, ou requête bloquée.",
+        );
+      }
+    }, WATCHDOG_MS);
+
+    const onPlaying = () => {
+      started = true;
+      window.clearTimeout(watchdog);
+      setLoading(false);
+    };
     video.addEventListener("playing", onPlaying);
 
+    const onFileError = () => {
+      window.clearTimeout(watchdog);
+      setLoading(false);
+      setError(
+        "Lecture impossible. Format non supporté par la WebView (mkv / H.265 ?) ou fichier indisponible.",
+      );
+    };
+
     if (mode === "file") {
-      // VOD : fichier direct, le navigateur gère le téléchargement progressif + seek.
       video.addEventListener("error", onFileError);
       video.src = src;
       video.play().catch(() => {});
     } else if (Hls.isSupported()) {
-      hls = new Hls({ lowLatencyMode: false, enableWorker: true });
-      hls.loadSource(src);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      hls = new Hls({
+        lowLatencyMode: false,
+        enableWorker: true,
+        manifestLoadingTimeOut: 15000,
+        manifestLoadingMaxRetry: 3,
+        levelLoadingTimeOut: 15000,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 4,
+      });
+      const inst = hls;
+      inst.loadSource(src);
+      inst.attachMedia(video);
+      inst.on(Hls.Events.MANIFEST_PARSED, () => {
         video.play().catch(() => {});
       });
-      hls.on(Hls.Events.ERROR, (_evt, data) => {
-        if (data.fatal) {
-          setLoading(false);
-          setError(
-            "Lecture impossible. Le flux est peut-être hors-ligne, ou le format n'est pas compatible navigateur.",
-          );
+      inst.on(Hls.Events.ERROR, (_evt, data) => {
+        if (!data.fatal) return;
+        // Tentatives de récupération avant d'abandonner.
+        if (data.type === ErrorTypes.NETWORK_ERROR && recoveries < 2) {
+          recoveries += 1;
+          inst.startLoad();
+          return;
         }
+        if (data.type === ErrorTypes.MEDIA_ERROR && recoveries < 2) {
+          recoveries += 1;
+          inst.recoverMediaError();
+          return;
+        }
+        window.clearTimeout(watchdog);
+        setLoading(false);
+        setError(
+          `Lecture impossible (${data.details || data.type}). Flux hors-ligne, codec non supporté, ou requête bloquée.`,
+        );
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
       video.play().catch(() => {});
     } else {
-      // Cas rare (aucun support HLS) : sortie d'erreur hors du flux synchrone.
       queueMicrotask(() => {
+        window.clearTimeout(watchdog);
         setLoading(false);
-        setError("Lecteur HLS non supporté par ce navigateur.");
+        setError("Lecteur HLS non supporté par cette WebView.");
       });
     }
 
     return () => {
+      window.clearTimeout(watchdog);
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("error", onFileError);
       if (hls) hls.destroy();
       video.removeAttribute("src");
       video.load();
     };
-  }, [src, mode]);
+  }, [src, mode, attempt]);
+
+  function retry() {
+    setError(null);
+    setLoading(true);
+    setAttempt((a) => a + 1);
+  }
 
   return (
     <div className="relative h-full w-full bg-neutral-950">
@@ -97,12 +149,19 @@ export default function Player({
         </div>
       )}
       {error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-12 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-12 text-center">
           {/* [I2] : erreur = icône + libellé, jamais la couleur seule. */}
           <span className="text-4xl" aria-hidden>
             ⚠️
           </span>
-          <p className="max-w-2xl text-xl text-error-300">{error}</p>
+          <p className="max-w-3xl text-xl text-error-300">{error}</p>
+          <Focusable
+            autoFocusOnMount
+            onClick={retry}
+            className="rounded-full border border-primary-500 px-8 py-3 text-lg text-primary-500 hover:bg-primary-500/10"
+          >
+            Réessayer
+          </Focusable>
         </div>
       )}
     </div>
