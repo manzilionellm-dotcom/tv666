@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
 /* ============================================================
-   ROYAL STREAMING — COUCHE DE TOKENS COULEUR (source de vérité)
-   Section 3 du brief. COULEURS UNIQUEMENT.
+   THE FEW — MAISON NOIR — COUCHE DE TOKENS COULEUR (source de vérité)
+   Noir profond, or champagne (= FOCUS), crème. COULEURS UNIQUEMENT.
    Toute couleur de l'app doit pointer vers ces tokens.
+   ⇒ Pour changer la teinte d'OR partout : une seule ligne, --color-primary-500.
    ============================================================ */
 @theme {
-  /* NEUTRES (canevas) */
-  --color-neutral-950: #0b1020; /* fond application (jamais #000000) */
-  --color-neutral-900: #141a2e; /* surface-1 : cartes, sidebar, dialogues */
-  --color-neutral-800: #1e2740; /* surface-2 : menus, lignes de réglages */
-  --color-neutral-700: #2e3a57; /* bordures / séparateurs (décoratif) */
-  --color-neutral-400: #8a93a8; /* texte tertiaire / placeholder */
-  --color-neutral-200: #c2c8d6; /* texte secondaire */
-  --color-neutral-50: #f3f5fa; /* texte primaire (blanc adouci, jamais #FFFFFF) */
+  /* NEUTRES (canevas Maison Noir) */
+  --color-neutral-950: #0e0e0e; /* noir profond — fond application */
+  --color-neutral-900: #1a1a1a; /* noir encre — cartes, sidebar, dialogues */
+  --color-neutral-800: #242424; /* surface-2 — menus, lignes de réglages */
+  --color-neutral-700: #3a3a3a; /* bordures / séparateurs (décoratif) */
+  --color-neutral-400: #9a9182; /* texte tertiaire / placeholder (gris chaud) */
+  --color-neutral-200: #cfc8b8; /* texte secondaire (crème atténuée) */
+  --color-neutral-50: #f5f1e8; /* crème — texte primaire */
 
-  /* PRIMAIRE — Or champagne (marque / focus / CTA) */
-  --color-primary-400: #d8b66a; /* hover */
-  --color-primary-500: #c9a24b; /* accent, bordure de focus, fond bouton primaire */
-  --color-primary-600: #a8842f; /* pressed / bas de gradient */
+  /* PRIMAIRE — Or champagne (marque / FOCUS / CTA) — teinte unique de la marque */
+  --color-primary-400: #d8c08a; /* hover (or clair) */
+  --color-primary-500: #c6a664; /* OR CHAMPAGNE — focus, accent, bouton primaire */
+  --color-primary-600: #a8842f; /* pressed / bas de gradient (or foncé) */
 
   /* SECONDAIRE — Améthyste */
   --color-secondary-300: #b6a2d6; /* texte / halo secondaire */
