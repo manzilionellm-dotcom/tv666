@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Black Seven TV",
-  description: "Lecteur IPTV pour téléviseurs — connexion Xtream Codes.",
-  applicationName: "Black Seven TV",
+  title: "The Few — Not For Everyone",
+  description: "The Few — Not For Everyone. Lecteur IPTV pour téléviseurs.",
+  applicationName: "The Few",
 };
 
 export const viewport: Viewport = {

@@ -55,10 +55,13 @@ export default function HomePage() {
   return (
     <main className="tv-safe flex flex-1 flex-col gap-10">
       <header className="flex items-center justify-between">
-        <div className="flex items-baseline gap-2 text-4xl font-bold tracking-tight">
-          <span className="text-neutral-50">BLACK</span>
-          <span className="text-primary-500">7</span>
-          <span className="text-neutral-50">TV</span>
+        <div className="flex flex-col leading-none">
+          <span className="text-3xl font-semibold tracking-[0.18em] text-neutral-50">
+            The Few
+          </span>
+          <span className="mt-1 text-[0.7rem] tracking-[0.42em] text-primary-500">
+            NOT FOR EVERYONE
+          </span>
         </div>
         <div className="flex items-center gap-6">
           {status && (

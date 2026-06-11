@@ -37,12 +37,15 @@ export default function LoginPage() {
   return (
     <main className="tv-safe flex flex-1 flex-col items-center justify-center">
       <div className="w-full max-w-2xl rounded-3xl bg-neutral-900 p-12">
-        <div className="mb-2 flex items-baseline gap-2 text-4xl font-bold tracking-tight">
-          <span className="text-neutral-50">BLACK</span>
-          <span className="text-primary-500">7</span>
-          <span className="text-neutral-50">TV</span>
+        <div className="mb-2 flex flex-col leading-none">
+          <span className="text-5xl font-semibold tracking-[0.18em] text-neutral-50">
+            The Few
+          </span>
+          <span className="mt-2 text-sm tracking-[0.5em] text-primary-500">
+            NOT FOR EVERYONE
+          </span>
         </div>
-        <p className="mb-8 text-lg text-neutral-200">Connexion Xtream Codes</p>
+        <p className="mb-8 mt-4 text-lg text-neutral-200">Connexion Xtream Codes</p>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-5">
           <input
