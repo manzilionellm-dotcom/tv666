@@ -7,9 +7,11 @@
 // Robustesse : chien de garde anti-blocage (timeout), récupération auto sur
 // erreur réseau/média, message d'erreur DÉTAILLÉ (code hls.js) + « Réessayer ».
 
-import Hls, { ErrorTypes } from "hls.js";
+import Hls, { ErrorTypes, type HlsConfig } from "hls.js";
+import { Capacitor } from "@capacitor/core";
 import { useEffect, useRef, useState } from "react";
 import Focusable from "@/components/tv/Focusable";
+import { CapacitorHlsLoader } from "@/lib/hlsCapacitorLoader";
 
 type Props = {
   src: string;
@@ -70,7 +72,7 @@ export default function Player({
       video.src = src;
       video.play().catch(() => {});
     } else if (Hls.isSupported()) {
-      hls = new Hls({
+      const hlsConfig: Partial<HlsConfig> = {
         lowLatencyMode: false,
         // WebView Capacitor : le worker (blob) est souvent bloqué et fait caler
         // le flux en silence -> transmuxing sur le thread principal, plus fiable.
@@ -80,7 +82,13 @@ export default function Player({
         levelLoadingTimeOut: 15000,
         fragLoadingTimeOut: 20000,
         fragLoadingMaxRetry: 4,
-      });
+      };
+      // Sur appareil : loader natif (CapacitorHttp) qui évite la corruption de la
+      // playlist par le patch global (cause de levelParsingError).
+      if (Capacitor.isNativePlatform()) {
+        hlsConfig.loader = CapacitorHlsLoader;
+      }
+      hls = new Hls(hlsConfig);
       const inst = hls;
       inst.loadSource(src);
       inst.attachMedia(video);
