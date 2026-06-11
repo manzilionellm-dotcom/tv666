@@ -13,6 +13,7 @@ import {
   timeshiftUrl,
   toTimeshiftStart,
 } from "@/lib/xtream";
+import { addRecent } from "@/lib/recent";
 import Player from "@/components/Player";
 import FavButton from "@/components/FavButton";
 import Focusable from "@/components/tv/Focusable";
@@ -45,6 +46,12 @@ function Watch() {
       return;
     }
     setMounted(true);
+    addRecent({
+      type: "live",
+      id: String(streamId),
+      name,
+      arch: hasArchive ? 1 : 0,
+    });
     getShortEpg(creds, streamId, 1)
       .then((res) => {
         const first = res.epg_listings?.[0];

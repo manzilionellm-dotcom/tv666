@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loadCredentials } from "@/lib/auth";
 import { seriesStreamUrl, vodStreamUrl } from "@/lib/xtream";
+import { addRecent } from "@/lib/recent";
 import Player from "@/components/Player";
 import FavButton from "@/components/FavButton";
 import Splash from "@/components/Splash";
@@ -32,7 +33,13 @@ function Play() {
     // Source dérivée d'identifiants client-only (localStorage), montage SSR-safe.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSrc(url);
-  }, [id, ext, kind, router]);
+    addRecent({
+      type: kind === "series" ? "series" : "movie",
+      id,
+      name,
+      ext,
+    });
+  }, [id, ext, kind, name, router]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
