@@ -63,6 +63,12 @@ export function getLiveCategories(
   return call<XtreamCategory[]>(creds, "get_live_categories");
 }
 
+// Tri par `num` : respecte l'alignement/numérotation imposé par le fournisseur
+// (Xtream Codes / M3U), comme le font les autres lecteurs IPTV.
+function byNum<T extends { num?: number }>(a: T, b: T): number {
+  return (a.num ?? 0) - (b.num ?? 0);
+}
+
 export function getLiveStreams(
   creds: XtreamCredentials,
   categoryId?: string,
@@ -71,7 +77,7 @@ export function getLiveStreams(
     creds,
     "get_live_streams",
     categoryId ? { category_id: categoryId } : undefined,
-  );
+  ).then((list) => [...list].sort(byNum));
 }
 
 export function getShortEpg(
@@ -101,7 +107,7 @@ export function getVodStreams(
     creds,
     "get_vod_streams",
     categoryId ? { category_id: categoryId } : undefined,
-  );
+  ).then((list) => [...list].sort(byNum));
 }
 
 // --- Séries ---
@@ -120,7 +126,7 @@ export function getSeries(
     creds,
     "get_series",
     categoryId ? { category_id: categoryId } : undefined,
-  );
+  ).then((list) => [...list].sort(byNum));
 }
 
 export function getSeriesInfo(
