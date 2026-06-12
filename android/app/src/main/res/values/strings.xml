@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Black Seven TV</string>
-    <string name="title_activity_main">Black Seven TV</string>
+    <string name="app_name">The Few</string>
+    <string name="title_activity_main">The Few</string>
     <string name="package_name">com.blackseven.tv</string>
     <string name="custom_url_scheme">com.blackseven.tv</string>
 </resources>
