@@ -85,8 +85,27 @@ export interface XtreamEpisode {
 }
 
 export interface XtreamSeriesInfo {
-  info: { name?: string; cover?: string; plot?: string };
+  info: { name?: string; cover?: string; plot?: string; genre?: string };
   episodes: Record<string, XtreamEpisode[]>;
+}
+
+export interface XtreamVodInfo {
+  info: {
+    movie_image?: string;
+    backdrop_path?: string[];
+    plot?: string;
+    cast?: string;
+    director?: string;
+    genre?: string;
+    releasedate?: string;
+    duration?: string;
+    rating?: string | number;
+  };
+  movie_data: {
+    stream_id: number;
+    name: string;
+    container_extension: string;
+  };
 }
 
 export interface XtreamShortEpgEntry {

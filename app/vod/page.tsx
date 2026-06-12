@@ -121,7 +121,7 @@ export default function VodPage() {
               key={m.stream_id}
               onClick={() =>
                 router.push(
-                  `/play?kind=movie&id=${m.stream_id}&ext=${encodeURIComponent(
+                  `/vod/detail?id=${m.stream_id}&ext=${encodeURIComponent(
                     m.container_extension,
                   )}&name=${encodeURIComponent(m.name)}`,
                 )

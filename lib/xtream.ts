@@ -12,6 +12,7 @@ import type {
   XtreamSeries,
   XtreamSeriesInfo,
   XtreamShortEpgEntry,
+  XtreamVodInfo,
   XtreamVodStream,
 } from "./types";
 
@@ -32,6 +33,7 @@ const CACHEABLE = new Set([
   "get_series_categories",
   "get_series",
   "get_series_info",
+  "get_vod_info",
 ]);
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
@@ -163,6 +165,14 @@ export function getVodStreams(
     "get_vod_streams",
     categoryId ? { category_id: categoryId } : undefined,
   ).then((list) => [...list].sort(byNum));
+}
+
+/** Fiche détaillée d'un film (synopsis, affiche large, durée, note…). */
+export function getVodInfo(
+  creds: XtreamCredentials,
+  vodId: number,
+): Promise<XtreamVodInfo> {
+  return call<XtreamVodInfo>(creds, "get_vod_info", { vod_id: vodId });
 }
 
 // --- Séries ---

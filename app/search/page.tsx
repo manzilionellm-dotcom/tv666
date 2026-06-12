@@ -76,7 +76,7 @@ export default function SearchPage() {
       router.push(`/watch?id=${r.id}&name=${encodeURIComponent(r.name)}&arch=0`);
     else if (r.kind === "movie")
       router.push(
-        `/play?kind=movie&id=${r.id}&ext=${encodeURIComponent(
+        `/vod/detail?id=${r.id}&ext=${encodeURIComponent(
           r.ext,
         )}&name=${encodeURIComponent(r.name)}`,
       );

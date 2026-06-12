@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const [status, setStatus] = useState("");
   const [expiry, setExpiry] = useState("");
+  const [conns, setConns] = useState("");
   const [parental, setParental] = useState(false);
   const [pin1, setPin1] = useState("");
   const [pin2, setPin2] = useState("");
@@ -39,6 +40,11 @@ export default function SettingsPage() {
       .then((info) => {
         setStatus(info.user_info.status || "Active");
         setExpiry(formatExpiry(info.user_info.exp_date));
+        if (info.user_info.max_connections) {
+          setConns(
+            `${info.user_info.active_cons ?? "0"} / ${info.user_info.max_connections}`,
+          );
+        }
       })
       .catch(() => setStatus("hors-ligne"));
   }, [router]);
@@ -88,6 +94,9 @@ export default function SettingsPage() {
           Statut : <span className="text-neutral-50">{status || "…"}</span>
           {expiry && (
             <span className="text-neutral-400"> · expire le {expiry}</span>
+          )}
+          {conns && (
+            <span className="text-neutral-400"> · connexions : {conns}</span>
           )}
         </p>
         <Focusable

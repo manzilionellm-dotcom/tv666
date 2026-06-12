@@ -69,6 +69,12 @@ function Detail() {
         <FavButton item={{ type: "series", id: String(seriesId), name }} />
       </div>
 
+      {info.info?.plot && (
+        <p className="max-w-3xl text-lg leading-relaxed text-neutral-200">
+          {info.info.plot}
+        </p>
+      )}
+
       {seasons.length === 0 && (
         <p className="text-xl text-neutral-400">Aucun épisode disponible.</p>
       )}
