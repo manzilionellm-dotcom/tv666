@@ -8,6 +8,11 @@ import { loadCredentials } from "@/lib/auth";
 import { authenticate } from "@/lib/xtream";
 import { FAV_EVENT, listFavorites, type FavItem } from "@/lib/favorites";
 import { RECENT_EVENT, listRecent, type RecentItem } from "@/lib/recent";
+import {
+  WATCHLATER_EVENT,
+  listWatchLater,
+  type WatchItem,
+} from "@/lib/watchlater";
 import Focusable from "@/components/tv/Focusable";
 import Splash from "@/components/Splash";
 
@@ -39,6 +44,15 @@ function favHref(f: FavItem): string {
   return `/series/detail?id=${f.id}&name=${n}`;
 }
 
+function watchHref(w: WatchItem): string {
+  const n = encodeURIComponent(w.name);
+  if (w.type === "live")
+    return `/watch?id=${w.id}&name=${n}&arch=${w.arch ?? 0}`;
+  if (w.type === "movie")
+    return `/play?kind=movie&id=${w.id}&ext=${encodeURIComponent(w.ext ?? "mp4")}&name=${n}`;
+  return `/series/detail?id=${w.id}&name=${n}`;
+}
+
 function formatExpiry(exp: string | null): string {
   if (!exp) return "Illimité";
   const d = new Date(Number(exp) * 1000);
@@ -53,6 +67,7 @@ export default function HomePage() {
   const [expiry, setExpiry] = useState<string>("");
   const [recent, setRecent] = useState<RecentItem[]>([]);
   const [favs, setFavs] = useState<FavItem[]>([]);
+  const [later, setLater] = useState<WatchItem[]>([]);
 
   useEffect(() => {
     const creds = loadCredentials();
@@ -66,10 +81,12 @@ export default function HomePage() {
     const refresh = () => {
       setRecent(listRecent());
       setFavs(listFavorites());
+      setLater(listWatchLater());
     };
     refresh();
     window.addEventListener(RECENT_EVENT, refresh);
     window.addEventListener(FAV_EVENT, refresh);
+    window.addEventListener(WATCHLATER_EVENT, refresh);
     authenticate(creds)
       .then((info) => {
         setStatus(info.user_info.status || "Active");
@@ -79,6 +96,7 @@ export default function HomePage() {
     return () => {
       window.removeEventListener(RECENT_EVENT, refresh);
       window.removeEventListener(FAV_EVENT, refresh);
+      window.removeEventListener(WATCHLATER_EVENT, refresh);
     };
   }, [router]);
 
@@ -150,6 +168,26 @@ export default function HomePage() {
                   {TYPE_LABEL[f.type]}
                 </span>
                 <span className="truncate text-lg text-neutral-50">{f.name}</span>
+              </Focusable>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {later.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xl text-neutral-200">À regarder plus tard</h2>
+          <div className="tv-scroll flex gap-4 overflow-x-auto pb-1">
+            {later.map((w) => (
+              <Focusable
+                key={`${w.type}:${w.id}`}
+                onClick={() => router.push(watchHref(w))}
+                className="flex aspect-video w-60 shrink-0 flex-col justify-end rounded-xl bg-neutral-900 p-4 text-left"
+              >
+                <span className="text-sm text-primary-500">
+                  {TYPE_LABEL[w.type]}
+                </span>
+                <span className="truncate text-lg text-neutral-50">{w.name}</span>
               </Focusable>
             ))}
           </div>
