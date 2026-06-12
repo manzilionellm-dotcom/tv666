@@ -22,11 +22,64 @@ export function normalizeServer(server: string): string {
   return s.replace(/\/+$/, "");
 }
 
+// Cache de session des listes (catégories/chaînes/films/séries) : la
+// navigation devient instantanée après le premier chargement. TTL 10 min.
+const CACHEABLE = new Set([
+  "get_live_categories",
+  "get_live_streams",
+  "get_vod_categories",
+  "get_vod_streams",
+  "get_series_categories",
+  "get_series",
+  "get_series_info",
+]);
+const CACHE_TTL_MS = 10 * 60 * 1000;
+
+function cacheKey(
+  creds: XtreamCredentials,
+  action: string,
+  params?: Record<string, string | number>,
+): string {
+  return `thefew.cache:${creds.server}:${creds.username}:${action}:${JSON.stringify(params ?? {})}`;
+}
+
+function cacheRead<T>(key: string): T | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return null;
+    const { t, d } = JSON.parse(raw) as { t: number; d: T };
+    if (Date.now() - t > CACHE_TTL_MS) return null;
+    return d;
+  } catch {
+    return null;
+  }
+}
+
+function cacheWrite(key: string, data: unknown): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(
+      key,
+      JSON.stringify({ t: Date.now(), d: data }),
+    );
+  } catch {
+    // quota plein (gros catalogues) : on vit sans cache pour cette entrée
+  }
+}
+
 async function call<T>(
   creds: XtreamCredentials,
   action?: string,
   params?: Record<string, string | number>,
 ): Promise<T> {
+  const key =
+    action && CACHEABLE.has(action) ? cacheKey(creds, action, params) : null;
+  if (key) {
+    const cached = cacheRead<T>(key);
+    if (cached !== null) return cached;
+  }
+
   const base = normalizeServer(creds.server);
   const sp = new URLSearchParams({
     username: creds.username,
@@ -40,7 +93,9 @@ async function call<T>(
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Erreur ${res.status}`);
-  return (await res.json()) as T;
+  const data = (await res.json()) as T;
+  if (key) cacheWrite(key, data);
+  return data;
 }
 
 /** Authentifie et renvoie les infos compte/serveur. Lève une erreur si refusé. */

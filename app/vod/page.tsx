@@ -11,6 +11,7 @@ import type { XtreamCategory, XtreamVodStream } from "@/lib/types";
 import Focusable from "@/components/tv/Focusable";
 import PinPrompt from "@/components/PinPrompt";
 import Splash from "@/components/Splash";
+import SkeletonGrid from "@/components/SkeletonGrid";
 
 export default function VodPage() {
   const router = useRouter();
@@ -110,9 +111,7 @@ export default function VodPage() {
             {error}
           </p>
         )}
-        {!error && loading && (
-          <p className="text-xl text-neutral-400">Chargement…</p>
-        )}
+        {!error && loading && <SkeletonGrid count={12} variant="poster" />}
         {!error && !loading && movies.length === 0 && (
           <p className="text-xl text-neutral-400">Aucun film dans cette catégorie.</p>
         )}

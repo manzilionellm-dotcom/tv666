@@ -116,7 +116,12 @@ export default function SpatialNav({ children }: { children: React.ReactNode }) 
       if (next) {
         e.preventDefault();
         next.focus();
-        next.scrollIntoView({ block: "nearest", inline: "nearest" });
+        // Centré + fluide : l'élément suivi reste au milieu de l'écran (10-foot).
+        next.scrollIntoView({
+          block: "center",
+          inline: "center",
+          behavior: "smooth",
+        });
       }
     }
 

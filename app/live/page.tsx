@@ -18,6 +18,7 @@ import type { XtreamCategory, XtreamLiveStream } from "@/lib/types";
 import Focusable from "@/components/tv/Focusable";
 import PinPrompt from "@/components/PinPrompt";
 import Splash from "@/components/Splash";
+import SkeletonGrid from "@/components/SkeletonGrid";
 
 export default function LivePage() {
   const router = useRouter();
@@ -142,9 +143,7 @@ export default function LivePage() {
             {error}
           </p>
         )}
-        {!error && loadingChannels && (
-          <p className="text-xl text-neutral-400">Chargement des chaînes…</p>
-        )}
+        {!error && loadingChannels && <SkeletonGrid count={12} />}
         {!error && !loadingChannels && channels.length === 0 && (
           <p className="text-xl text-neutral-400">Aucune chaîne dans cette catégorie.</p>
         )}
