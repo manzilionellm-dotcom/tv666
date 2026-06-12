@@ -93,6 +93,9 @@ export default function LoginPage() {
             {busy ? "Connexion…" : "Se connecter"}
           </Focusable>
         </form>
+        <p className="mt-6 text-center text-sm text-neutral-400">
+          The Few · build {process.env.NEXT_PUBLIC_BUILD ?? "dev"}
+        </p>
       </div>
     </main>
   );

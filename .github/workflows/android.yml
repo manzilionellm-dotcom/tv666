@@ -25,6 +25,8 @@ jobs:
       - run: npm ci
 
       - name: Export statique de l'app (génère out/)
+        env:
+          NEXT_PUBLIC_BUILD: ${{ github.run_number }}
         run: npm run build
 
       - uses: actions/setup-java@v4

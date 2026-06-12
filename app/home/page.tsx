@@ -124,6 +124,9 @@ export default function HomePage() {
               )}
             </span>
           )}
+          <span className="text-sm text-neutral-400">
+            v{process.env.NEXT_PUBLIC_BUILD ?? "dev"}
+          </span>
           <Focusable
             onClick={() => router.push("/settings")}
             className="rounded-full border border-neutral-700 px-6 py-3 text-lg text-neutral-50 hover:bg-neutral-800"
