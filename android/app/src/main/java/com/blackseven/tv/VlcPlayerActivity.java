@@ -60,12 +60,18 @@ public class VlcPlayerActivity extends Activity {
         libVLC = new LibVLC(this, options);
 
         mediaPlayer = new MediaPlayer(libVLC);
-        mediaPlayer.attachViews(videoLayout, null, false, false);
         mediaPlayer.setEventListener(this::onPlayerEvent);
 
-        lastProgressAt = System.currentTimeMillis();
-        playMedia();
-        handler.postDelayed(watchdog, WATCHDOG_MS);
+        // On attend que la VLCVideoLayout soit posée (surface prête) avant
+        // d'attacher la vue et de lancer : évite l'écran noir. TextureView
+        // (4e param true) rend dans la hiérarchie de vues -> plus fiable sur TV.
+        videoLayout.post(() -> {
+            if (mediaPlayer == null) return;
+            mediaPlayer.attachViews(videoLayout, null, false, true);
+            lastProgressAt = System.currentTimeMillis();
+            playMedia();
+            handler.postDelayed(watchdog, WATCHDOG_MS);
+        });
     }
 
     private void playMedia() {
