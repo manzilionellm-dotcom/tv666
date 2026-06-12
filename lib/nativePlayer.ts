@@ -7,7 +7,7 @@ import { Capacitor, registerPlugin } from "@capacitor/core";
 
 interface VlcPlugin {
   /** Ouvre l'URL en plein écran dans libVLC (Activity native dédiée). */
-  play(options: { url: string; title?: string }): Promise<void>;
+  play(options: { url: string; title?: string; live?: boolean }): Promise<void>;
 }
 
 const Vlc = registerPlugin<VlcPlugin>("Vlc");
@@ -16,6 +16,9 @@ export function nativePlaybackAvailable(): boolean {
   return Capacitor.isNativePlatform();
 }
 
-export async function playNative(url: string, title?: string): Promise<void> {
-  await Vlc.play({ url, title });
+export async function playNative(
+  url: string,
+  opts?: { title?: string; live?: boolean },
+): Promise<void> {
+  await Vlc.play({ url, title: opts?.title, live: opts?.live ?? true });
 }

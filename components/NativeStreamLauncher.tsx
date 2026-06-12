@@ -10,15 +10,17 @@ import { playNative } from "@/lib/nativePlayer";
 export default function NativeStreamLauncher({
   url,
   title,
+  live = true,
   onExit,
 }: {
   url: string;
   title?: string;
+  live?: boolean;
   onExit: () => void;
 }) {
   useEffect(() => {
     let active = true;
-    playNative(url, title).finally(() => {
+    playNative(url, { title, live }).finally(() => {
       if (active) onExit();
     });
     return () => {

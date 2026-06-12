@@ -62,6 +62,7 @@ function Play() {
       <NativeStreamLauncher
         url={src}
         title={name}
+        live={false}
         onExit={() => router.back()}
       />
     );

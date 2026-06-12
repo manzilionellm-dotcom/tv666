@@ -23,6 +23,7 @@ public class VlcPlugin extends Plugin {
         }
         Intent intent = new Intent(getContext(), VlcPlayerActivity.class);
         intent.putExtra("url", url);
+        intent.putExtra("live", Boolean.TRUE.equals(call.getBoolean("live", true)));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getContext().startActivity(intent);
         call.resolve();
