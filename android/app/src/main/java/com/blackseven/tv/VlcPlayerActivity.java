@@ -85,10 +85,12 @@ public class VlcPlayerActivity extends Activity {
         mediaPlayer = new MediaPlayer(libVLC);
         mediaPlayer.setEventListener(this::onPlayerEvent);
 
-        // Attache une fois la surface posée (évite l'écran noir au lancement).
+        // Attache une fois la surface posée. TextureView (4e param = true) :
+        // rend l'image DANS la hiérarchie de vues -> aucun problème de fond
+        // opaque/superposition (cause d'écran noir avec SurfaceView).
         videoLayout.post(() -> {
             if (mediaPlayer == null) return;
-            mediaPlayer.attachViews(videoLayout, null, false, false);
+            mediaPlayer.attachViews(videoLayout, null, false, true);
             lastProgressAt = System.currentTimeMillis();
             playMedia();
             handler.postDelayed(watchdog, WATCHDOG_MS);
