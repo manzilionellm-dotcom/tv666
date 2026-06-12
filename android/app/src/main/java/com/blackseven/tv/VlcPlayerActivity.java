@@ -57,6 +57,9 @@ public class VlcPlayerActivity extends Activity {
         options.add("--network-caching=3000");
         options.add("--live-caching=3000");
         options.add("--rtsp-tcp");
+        // Meilleure qualité : sur un flux adaptatif (HLS multi-débit), toujours
+        // choisir la rendition la PLUS HAUTE plutôt que de baisser.
+        options.add("--adaptive-logic=highest");
         libVLC = new LibVLC(this, options);
 
         mediaPlayer = new MediaPlayer(libVLC);
