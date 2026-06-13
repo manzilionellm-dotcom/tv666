@@ -1,17 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Oswald, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SpatialNav from "@/components/tv/SpatialNav";
 import BackHandler from "@/components/BackHandler";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// 3 rôles typographiques : Inter (UI), Oswald (titres d'accent), JetBrains Mono
+// (code d'activation uniquement).
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
+const oswald = Oswald({
+  variable: "--font-oswald",
   subsets: ["latin"],
+  weight: ["500", "600"],
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
+  weight: ["600"],
 });
 
 export const metadata: Metadata = {
@@ -21,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0e0e0e",
+  themeColor: "#070707",
   width: "device-width",
   initialScale: 1,
 };
@@ -34,9 +38,9 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${oswald.variable} ${jetMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-50">
+      <body className="flex min-h-full flex-col bg-bg text-text">
         <SpatialNav>{children}</SpatialNav>
         <BackHandler />
       </body>
