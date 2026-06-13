@@ -10,11 +10,11 @@ export function deviceCode(): string {
   if (typeof window === "undefined") return "";
   let code = window.localStorage.getItem(KEY);
   if (!code) {
-    const arr = new Uint8Array(12);
+    const arr = new Uint8Array(10);
     crypto.getRandomValues(arr);
     const chars = Array.from(arr, (b) => ALPHABET[b % ALPHABET.length]);
-    const groups: string[] = [];
-    for (let i = 0; i < 12; i += 2) groups.push(chars[i] + chars[i + 1]);
+    const groups: string[] = ["MK"]; // préfixe identique au panel 7themotion
+    for (let i = 0; i < 10; i += 2) groups.push(chars[i] + chars[i + 1]);
     code = groups.join(":");
     window.localStorage.setItem(KEY, code);
   }
