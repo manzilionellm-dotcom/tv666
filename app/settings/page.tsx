@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { clearCredentials, loadCredentials } from "@/lib/auth";
 import { authenticate } from "@/lib/xtream";
 import { clearPin, isParentalEnabled, setPin } from "@/lib/parental";
+import { deviceCode } from "@/lib/device";
 import TopBar from "@/components/TopBar";
 import Focusable from "@/components/tv/Focusable";
 import PinPrompt from "@/components/PinPrompt";
@@ -22,6 +23,7 @@ export default function SettingsPage() {
   const [status, setStatus] = useState("");
   const [expiry, setExpiry] = useState("");
   const [conns, setConns] = useState("");
+  const [code, setCode] = useState("");
   const [parental, setParental] = useState(false);
   const [pin1, setPin1] = useState("");
   const [pin2, setPin2] = useState("");
@@ -36,6 +38,7 @@ export default function SettingsPage() {
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setParental(isParentalEnabled());
+    setCode(deviceCode());
     authenticate(creds)
       .then((info) => {
         setStatus(info.user_info.status || "Active");
@@ -104,6 +107,22 @@ export default function SettingsPage() {
           className="mt-2 self-start rounded-full border border-neutral-700 px-6 py-3 text-lg text-neutral-50 hover:bg-neutral-800"
         >
           Déconnexion
+        </Focusable>
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-2xl bg-neutral-900 p-8">
+        <h2 className="text-2xl font-semibold text-neutral-50">Activation</h2>
+        <p className="text-lg text-neutral-300">
+          Code de cet appareil (à donner au revendeur) :
+        </p>
+        <p className="font-mono text-2xl tracking-widest text-primary-500">
+          {code}
+        </p>
+        <Focusable
+          onClick={() => router.push("/activation")}
+          className="mt-1 self-start rounded-full border border-primary-500 px-6 py-3 text-lg text-primary-500 hover:bg-primary-500/10"
+        >
+          Écran d’activation
         </Focusable>
       </section>
 
