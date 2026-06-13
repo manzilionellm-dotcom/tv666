@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Films (VOD) : catégories (gauche) + affiches (grille droite).
+// The Few — Films (VOD) : catégories (gauche) + affiches (grille droite).
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

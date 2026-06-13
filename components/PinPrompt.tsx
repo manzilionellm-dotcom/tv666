@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Saisie du code PIN (contrôle parental) en surimpression.
+// The Few — Saisie du code PIN (contrôle parental) en surimpression.
 
 import { useState } from "react";
 import Focusable from "./tv/Focusable";

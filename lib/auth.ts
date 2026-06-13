@@ -1,4 +1,4 @@
-// Black Seven TV — Stockage local des identifiants Xtream (sur l'appareil).
+// The Few — Stockage local des identifiants Xtream (sur l'appareil).
 // Les identifiants ne servent qu'aux appels directs vers le serveur Xtream.
 
 import type { XtreamCredentials } from "./types";

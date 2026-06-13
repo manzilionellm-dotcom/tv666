@@ -1,4 +1,4 @@
-// Black Seven TV — Client Xtream Codes (côté appareil).
+// The Few — Client Xtream Codes (côté appareil).
 // L'app étant un APK autonome (Capacitor), elle appelle DIRECTEMENT le serveur
 // Xtream. Le CORS et le cleartext http sont gérés nativement par CapacitorHttp
 // (qui patche fetch/XHR sur l'appareil). En navigateur, ces appels peuvent

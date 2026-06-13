@@ -1,4 +1,4 @@
-// Black Seven TV — Favoris persistés en local (client uniquement).
+// The Few — Favoris persistés en local (client uniquement).
 
 export type FavType = "live" | "movie" | "series";
 

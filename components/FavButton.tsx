@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Bouton étoile : ajoute/retire l'élément courant des favoris.
+// The Few — Bouton étoile : ajoute/retire l'élément courant des favoris.
 
 import { useEffect, useState } from "react";
 import Focusable from "./tv/Focusable";

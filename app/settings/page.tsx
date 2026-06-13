@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Réglages : compte, déconnexion, contrôle parental (PIN).
+// The Few — Réglages : compte, déconnexion, contrôle parental (PIN).
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

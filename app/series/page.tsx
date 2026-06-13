@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Séries : catégories (gauche) + séries (grille). Le détail
+// The Few — Séries : catégories (gauche) + séries (grille). Le détail
 // (saisons/épisodes) est sur /series/[id].
 
 import { useCallback, useEffect, useState } from "react";

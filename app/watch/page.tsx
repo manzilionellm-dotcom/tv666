@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Lecteur plein écran d'une chaîne live + "en cours" (EPG) +
+// The Few — Lecteur plein écran d'une chaîne live + "en cours" (EPG) +
 // favori + catch-up (replay) si la chaîne dispose de l'archive (tv_archive).
 
 import { Suspense, useEffect, useMemo, useState } from "react";

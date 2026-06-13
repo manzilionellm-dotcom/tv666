@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Lecture d'un fichier VOD / épisode de série (mode fichier).
+// The Few — Lecture d'un fichier VOD / épisode de série (mode fichier).
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

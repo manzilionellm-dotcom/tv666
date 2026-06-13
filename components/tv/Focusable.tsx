@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Bouton focusable de base. Élément natif <button> (Entrée/OK
+// The Few — Bouton focusable de base. Élément natif <button> (Entrée/OK
 // gérés nativement) marqué data-focusable pour la navigation spatiale.
 
 import type { ButtonHTMLAttributes } from "react";

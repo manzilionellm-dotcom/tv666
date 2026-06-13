@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Guide TV (EPG) : catégorie -> chaînes avec "en cours / à suivre".
+// The Few — Guide TV (EPG) : catégorie -> chaînes avec "en cours / à suivre".
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

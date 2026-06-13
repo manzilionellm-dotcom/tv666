@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Barre supérieure : retour Accueil + titre de section.
+// The Few — Barre supérieure : retour Accueil + titre de section.
 
 import { useRouter } from "next/navigation";
 import Focusable from "./tv/Focusable";

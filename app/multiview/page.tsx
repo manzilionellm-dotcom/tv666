@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Multiview : mosaïque de jusqu'à 4 chaînes favorites en simultané.
+// The Few — Multiview : mosaïque de jusqu'à 4 chaînes favorites en simultané.
 // Toutes muettes sauf la cellule sélectionnée (OK = plein écran).
 
 import { useEffect, useState } from "react";

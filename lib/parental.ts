@@ -1,4 +1,4 @@
-// Black Seven TV — Contrôle parental. PIN local + détection des catégories adultes.
+// The Few — Contrôle parental. PIN local + détection des catégories adultes.
 // Le PIN n'est qu'un garde-fou d'affichage local (pas une sécurité forte).
 
 const PIN_KEY = "black7tv.parental.pin";

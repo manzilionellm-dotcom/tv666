@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Point d'entrée / aiguillage : redirige selon la présence
+// The Few — Point d'entrée / aiguillage : redirige selon la présence
 // d'identifiants Xtream enregistrés.
 
 import { useEffect } from "react";

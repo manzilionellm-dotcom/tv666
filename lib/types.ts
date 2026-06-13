@@ -1,4 +1,4 @@
-// Black Seven TV — Types du domaine Xtream Codes.
+// The Few — Types du domaine Xtream Codes.
 // Conformes à l'API player_api.php (champs réellement renvoyés par les panels Xtream).
 
 export interface XtreamCredentials {

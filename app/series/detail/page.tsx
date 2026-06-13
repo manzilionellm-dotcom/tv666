@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Détail d'une série : saisons / épisodes + favori.
+// The Few — Détail d'une série : saisons / épisodes + favori.
 // Route en query (?id=&name=) pour rester compatible avec l'export statique.
 
 import { Suspense, useEffect, useState } from "react";

@@ -1,4 +1,4 @@
-// Black Seven TV — Couche télécommande universelle.
+// The Few — Couche télécommande universelle.
 // Normalise n'importe quelle télécommande (Android TV, Fire TV, Tizen/Samsung,
 // webOS/LG, HbbTV, Vidaa…) en actions sémantiques. Les codes touches varient
 // fortement selon la marque : on mappe DONC à la fois `e.key` ET `e.keyCode`.

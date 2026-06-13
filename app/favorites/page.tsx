@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Favoris (live, films, séries). Persistés en local.
+// The Few — Favoris (live, films, séries). Persistés en local.
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

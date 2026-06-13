@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Navigation spatiale à la télécommande (D-pad).
+// The Few — Navigation spatiale à la télécommande (D-pad).
 // Déplace le focus vers l'élément focusable le plus proche dans la direction
 // de la flèche. Les éléments natifs (button/a/input) gèrent Entrée/OK eux-mêmes.
 

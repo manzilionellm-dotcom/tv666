@@ -1,6 +1,6 @@
 "use client";
 
-// Black Seven TV — Recherche globale (chaînes, films, séries).
+// The Few — Recherche globale (chaînes, films, séries).
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
