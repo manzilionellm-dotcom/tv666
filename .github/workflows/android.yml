@@ -55,16 +55,24 @@ jobs:
           name: 7motion-apk
           path: 7motion.apk
 
-      - name: Publier la Release (tag latest)
+      - name: Publier la Release (build permanent vN + lien stable latest)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          N="${GITHUB_RUN_NUMBER}"
+          # 1) Copie nommée par build (URL unique, zéro cache, listée sur Releases).
+          cp 7motion.apk "the-few-v${N}.apk"
+          gh release create "v${N}" "the-few-v${N}.apk" \
+            --target "$GITHUB_SHA" \
+            --title "The Few — build ${N}" \
+            --notes "The Few — build ${N} (commit ${GITHUB_SHA}). APK Android TV (sideload)." || true
+          # 2) Lien stable 'latest' (pour le code Downloader) -> toujours le dernier.
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest 7motion.apk \
             --target "$GITHUB_SHA" \
-            --title "7Motion TV — APK Android TV" \
-            --notes "APK Android TV autonome (debug, sideload). Lien direct : releases/download/latest/7motion.apk"
+            --title "The Few — dernière version (build ${N})" \
+            --notes "Dernier build : ${N} (commit ${GITHUB_SHA}). Lien direct : releases/download/latest/7motion.apk"
 
       - name: Héberger l'APK sur un lien public temporaire (repli)
         run: |
